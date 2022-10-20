@@ -31,7 +31,7 @@ x = np.array([[1],
 sys = control.ss(A, B, C, D)
 tout, yout = control.forced_response(sys, time, u, x)
 noise = np.random.normal(0, v, np.shape(time))
-youtnoise = yout + noise  # 2x100
+youtnoise = yout + noise  # 1x100
 
 def predict(A, x, B, u, P, Q):
     x = A@x + B@u  # 2x1
@@ -53,7 +53,7 @@ for i in range(0, len(time)):
     x, P = update(C, x, yi, P, R)
     xhat = np.append(xhat, x, axis=1)
 
-xhat = xhat[:, 1:]  # delete first temp entry
+xhat = xhat[:, 1:]  # delete first temp entry 2x100
 print(f'xhat: {np.shape(xhat)}')
 
 plt.figure(1)
