@@ -45,7 +45,8 @@ def update(C, x, y, P, R):
     P = (np.eye(2) - K@C)@P  # 2x2
     return x, P
 
-xhat = x
+xhat = np.array([[],
+                 []])
 for i in range(0, len(time)):
     ui = np.array([[u[i]]])  # input
     yi = np.array([[youtnoise[i]]])  # measurement
@@ -53,7 +54,7 @@ for i in range(0, len(time)):
     x, P = update(C, x, yi, P, R)
     xhat = np.append(xhat, x, axis=1)
 
-xhat = xhat[:, 1:]  # delete first temp entry 2x100
+# xhat = xhat[:, 1:]  # delete first temp entry 2x100
 print(f'xhat: {np.shape(xhat)}')
 
 plt.figure(1)
