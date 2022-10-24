@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import control
 
-m = 20
-b = 4
-k = 2
-F = 5
-# kp = 10 #350
-# ki = 5 #300
-# kd = 1 #50
+m = 1
+b = 10
+k = 20
+F = 1
+kp = 350 #350
+ki = 300 #300
+kd = 50 #50
 
 # A = np.array([[   0,    1],
 #               [-k/m, -b/m]])
@@ -17,7 +17,7 @@ F = 5
 # C = np.array([[1, 0]])
 # D = np.array([[0]])
 
-time = np.arange(0, 60, 0.1)
+time = np.arange(0, 10, 0.1)
 # print(len(time))
 ref = F*np.ones(np.shape(time))
 
@@ -38,12 +38,14 @@ prev_u = 0
 prev2_error = 0
 x1_arr = []
 x2_arr = []
+# x = np.array([[0],
+#               [0]])
 for i in range(0, len(time)):
     ri = ref[i]
     ti = time[i]
     
-    # dt = ti - prev_time
-    # error = ri - y
+    dt = ti - prev_time
+    error = ri - y
     # proportional = error
     # integral = integral + error*dt
     # derivative = (error-prev_error)/dt
@@ -51,17 +53,17 @@ for i in range(0, len(time)):
     # prev_error = error
     # prev_time = ti
     
-    dt = ti - prev_time
+    # dt = ti - prev_time
     # error = ri - y
-    # u = (prev_u 
-    #      + (kp+ki*dt+kd/dt)*error 
-    #      + (-kp-2*kd/dt)*prev_error 
-    #      + kd/dt*prev2_error)
-    # prev2_error = prev_error
-    # prev_error = error
-    # prev_time = ti
-    # prev_u = u
-    # u = np.array([[u]])
+    u = (prev_u 
+         + (kp+ki*dt+kd/dt)*error 
+         + (-kp-2*kd/dt)*prev_error 
+         + kd/dt*prev2_error)
+    prev2_error = prev_error
+    prev_error = error
+    prev_time = ti
+    prev_u = u
+    # u = np.array([[ri]])
     
     # print(np.shape(A), np.shape(x), np.shape(B), np.shape(u))
     # print(np.shape(C), np.shape(x), np.shape(D), np.shape(u))
@@ -70,7 +72,7 @@ for i in range(0, len(time)):
     # x = A@x + B@u
     # y = C@x + D@u
     
-    u = ri
+    # u = ri
     a11 = 1
     a12 = dt
     a21 = -(dt*k)/m
@@ -95,13 +97,15 @@ for i in range(0, len(time)):
     u_arr = np.append(u_arr, u)
     y_arr = np.append(y_arr, y)
     # print(np.shape(x), np.shape(y))
+    
+    # prev_time = ti
 # print(np.shape(y_arr))
 
 plt.figure(1)
-# plt.plot(time, r_arr, 'b', label='r')
-# plt.plot(time, e_arr, 'r', label='e')
+plt.plot(time, r_arr, 'b', label='r')
+plt.plot(time, e_arr, 'r', label='e')
 # plt.plot(time, u_arr, 'y', label='u')
-# plt.plot(time, y_arr, 'c--', label='y')
+plt.plot(time, y_arr, 'c--', label='y')
 plt.plot(time, x1_arr, label='x1')
 plt.plot(time, x2_arr, label='x2')
 plt.legend()
