@@ -17,8 +17,8 @@ D = np.array([[0]])
 time = np.arange(0, 10, 0.1)
 u = F*np.ones(np.shape(time))
 
-v = 0.5
-w = 0.01
+v = 0.1
+w = 0.1
 P = np.array([[1, 0],
               [0, 1]])
 Q = np.array([[w**2, 0],
@@ -58,7 +58,7 @@ for i in range(0, len(time)):
 print(f'xhat: {np.shape(xhat)}')
 
 plt.figure(1)
-plt.plot(time, u, label='u')
+plt.plot(time, u, label='r')
 plt.plot(time, yout, label='y')
 plt.plot(time, youtnoise, label='y+noise')
 plt.plot(time, xhat[0,:], label='x')
