@@ -35,6 +35,7 @@ x1_arr = []
 x2_arr = []
 y1_arr = []
 y2_arr = []
+ref_omega = 1
 
 for i in range(0, len(time)):
     # single values
@@ -56,10 +57,10 @@ for i in range(0, len(time)):
     # piv
     dt = ti - prev_time
     error = ri - y1_curr
-    vhat = (x1_curr - prev_x)/dt
-    u1 = kp*error - vhat
+    omega = (x1_curr - prev_x)/dt
+    u1 = kp*error + ref_omega - omega
     integral = integral + error*dt
-    u2 = ki * integral - kv*vhat
+    u2 = ki * integral - kv*omega
     prev_x = x1_curr
     prev_time = ti
     u = u2
