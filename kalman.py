@@ -27,7 +27,7 @@ P = np.array([[1, 0],
 w = 0.1  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
-v = 0.1  # std dev measurement noise
+v = 1  # std dev measurement noise
 R = np.array([[v**2]])  # covariance measurement noise
 x = np.array([[0],
               [0]])  # initial state
@@ -35,7 +35,7 @@ x = np.array([[0],
 # simulate response data
 sys = control.ss(A, B, C, D)
 tout, yout = control.forced_response(sys, time, ref, x)
-noise = np.random.normal(0, v, np.shape(time))  # assume guassian noise, mu, sigma
+noise = np.random.normal(0, 0.1, np.shape(time))  # assume guassian noise, mu, sigma
 youtnoise = yout + noise  # 1x100
 
 def predict(A, x, B, u, P, Q, dt):
@@ -53,9 +53,8 @@ def update(C, x, y, P, R):
     return x, P
 
 # x estimate
-xhat = np.array([[],
-                 []])
-for i in range(0, len(time)):
+xhat = x
+for i in range(0, len(time)-1):
     # single values
     ui = np.array([[ref[i]]])  # reference
     yi = np.array([[youtnoise[i]]])  # measurement + noise
