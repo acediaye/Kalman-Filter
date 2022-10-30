@@ -27,7 +27,7 @@ P = np.array([[1, 0],
 w = 0.1  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
-v = 1  # std dev measurement noise
+v = 0.1  # std dev measurement noise
 R = np.array([[v**2]])  # covariance measurement noise
 x = np.array([[0],
               [0]])  # initial state
