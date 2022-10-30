@@ -41,12 +41,15 @@ youtnoise = yout + noise  # 1x100
 def predict(A, x, B, u, P, Q, dt):
     x = x + dt*(A@x + B@u)  # 2x1
     P = P + dt*(A@P + P@A.T + Q)  # 2x2
+    # x = A@x + B@u
+    # P = A@P@A.T + Q
     return x, P
 
 def update(C, x, y, P, R):
     K = P@C.T@np.linalg.inv(C@P@C.T + R)  # 2x1
     x = x + K@(y - C@x)  # 2x1
     P = P - K@C@P  # 2x2
+    # P = (np.eye(len(P))-K@C)@P@(np.eye(len(P))-K@C).T + K@R@K.T
     return x, P
 
 # x estimate
