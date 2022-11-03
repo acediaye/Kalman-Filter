@@ -24,10 +24,10 @@ ref = F*np.ones(np.shape(time))
 # tuning matrix
 P = np.array([[1, 0],
               [0, 1]])  # covariance matrix
-w = 0.1  # std dev process noise
+w = 0.5  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
-v = 0.1  # std dev measurement noise
+v = 0.5  # std dev measurement noise
 R = np.array([[v**2]])  # covariance measurement noise
 x = np.array([[0],
               [0]])  # initial state
@@ -37,7 +37,7 @@ sys = control.ss(A, B, C, D)
 tout, yout = control.forced_response(sys, time, ref, x)
 noise = np.random.normal(0, 0.1, np.shape(time))  # assume guassian noise, mu, sigma
 youtnoise = yout + noise  # 1x100
-
+    
 def predict(A, x, B, u, P, Q, dt):
     x = x + dt*(A@x + B@u)  # 2x1
     P = P + dt*(A@P + P@A.T + Q)  # 2x2
