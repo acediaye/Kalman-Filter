@@ -7,7 +7,6 @@ m = 10
 b = 10
 k = 20
 F = 5
-dt = 0.1
 
 # state space
 A = np.array([[   0,    1],
@@ -18,6 +17,7 @@ C = np.array([[1, 0]])
 D = np.array([[0]])
 
 # reference
+dt = 0.1
 time = np.arange(0, 10, dt)
 print(np.shape(time))
 ref = F*np.ones(np.shape(time))
@@ -25,7 +25,7 @@ ref = F*np.ones(np.shape(time))
 # tuning matrix
 P = np.array([[1, 0],
               [0, 1]])  # covariance matrix
-w = 0.1  # std dev process noise
+w = 0.5  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
 v = 0.5  # std dev measurement noise
@@ -44,15 +44,13 @@ def predict(A, x, B, u, P, Q, dt):
     # P = P + dt*(A@P + P@A.T + Q)  # 2x2
     F = (np.eye(len(A)) + dt*A)
     x = F@x + dt*B@u
-    P = F@P@F.T + Q  # 2x2
-    # P = P + dt*(A@P + P@A.T) + Q + dt*dt*A@P@A.T  # 2x2
+    P = F@P@F.T + Q*dt  # 2x2
     return x, P
 
 def update(C, x, y, P, R):
     K = P@C.T@np.linalg.inv(C@P@C.T + R)  # 2x1
     x = x + K@(y - C@x)  # 2x1
     P = P - K@C@P  # 2x2
-    # P = (np.eye(len(P))-K@C)@P@(np.eye(len(P))-K@C).T + K@R@K.T
     return x, P
 
 # x estimate
