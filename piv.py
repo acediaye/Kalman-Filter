@@ -66,6 +66,9 @@ def pid(idx, dt, ref, mea):
 
 def model_d(idx, dt, u):
     global x_arr, y_arr
+    m = 10
+    b = 10
+    k = 20
     # model discrete mass spring damper
     u = np.array([[u]])
     A = np.array([[        1,           dt],

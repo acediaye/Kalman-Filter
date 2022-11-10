@@ -36,43 +36,44 @@ x = np.array([[0],
 # simulate response data
 sys = control.ss(A, B, C, D)
 tout, yout = control.forced_response(sys, time, ref, x)
-noise = np.random.normal(0, 0.1, np.shape(time))  # assume guassian noise, mu, sigma
+noise = np.random.normal(0, 0.1, np.shape(time))  # assume guassian noise: mu, sigma
 youtnoise = yout + noise  # 1x100
 
 def predict(A, x, B, u, P, Q, dt):
     # x = x + dt*(A@x + B@u)  # 2x1
     # P = P + dt*(A@P + P@A.T + Q)  # 2x2
+    u = np.array([[u]])
     F = (np.eye(len(A)) + dt*A)
     x = F@x + dt*B@u
     P = F@P@F.T + Q*dt  # 2x2
     return x, P
 
 def update(C, x, y, P, R):
+    y = np.array([[y]])
     K = P@C.T@np.linalg.inv(C@P@C.T + R)  # 2x1
     x = x + K@(y - C@x)  # 2x1
     P = P - K@C@P  # 2x2
     return x, P
 
-# x estimate
-xhat = np.array([[],
-                 []])
-for i in range(0, len(time)):
-    # single values
-    ui = np.array([[ref[i]]])  # reference
-    yi = np.array([[youtnoise[i]]])  # measurement + noise
-    x, P = predict(A, x, B, ui, P, Q, dt)
-    x, P = update(C, x, yi, P, R)
-    # save values
-    xhat = np.append(xhat, x, axis=1)
-print(f'xhat: {np.shape(xhat)}')
-print(f'P: {P}')
-
-# plotting
-plt.figure(1)
-# plt.plot(time, ref, label='r')
-plt.plot(time, yout, label='y')
-plt.plot(time, youtnoise, label='y+noise')
-plt.plot(time, xhat[0,:], label='x')
-# plt.plot(time, xhat[1,:], label='v')
-plt.legend()
-plt.show()
+if __name__ == '__main__':
+    # x estimate
+    xhat = np.array([[],
+                    []])
+    for i in range(0, len(time)):
+        # single values
+        ui = ref[i]  # reference
+        yi = youtnoise[i]  # measurement + noise
+        x, P = predict(A, x, B, ui, P, Q, dt)
+        x, P = update(C, x, yi, P, R)
+        # save values
+        xhat = np.append(xhat, x, axis=1)
+    print(f'xhat: {np.shape(xhat)}')
+    # plotting
+    plt.figure(1)
+    # plt.plot(time, ref, label='r')
+    plt.plot(time, yout, label='y')
+    plt.plot(time, youtnoise, label='y+noise')
+    plt.plot(time, xhat[0,:], label='x')
+    # plt.plot(time, xhat[1,:], label='v')
+    plt.legend()
+    plt.show()
