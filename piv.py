@@ -1,26 +1,40 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# tuning constants
-m = 10
-b = 10
-k = 20
-F = 1
-
-# control constants
-kp = 0
-ki = 1000
-kd = 0
-kv = 100
-# pid 350 300 50
-# piv 10 1 10(ref omega=0)
-# piv 0 1000 100(kp=0, ref omega = 4)
-ref_omega = 4
-
 # reference
-dt = 0.01
-time = np.arange(0, 10, dt)
-ref = F*np.ones(np.shape(time))
+dt = 0.001  # under sampling can cause instability 
+time = np.arange(0, 1, dt)
+control = 'piv'  # pid, piv
+mode = 'pos'  # pos, vel
+ref_theta = 1*np.ones(np.shape(time))
+if mode == 'pos':
+    ref_omega = 0
+elif mode == 'vel':
+    ref_omega = 4
+
+# model constants
+Kt = 0.6
+b = 0.1e-3
+J = 50e-6
+# control constants
+if control == 'piv':
+    BW = 20
+    zeta = 1
+    if mode == 'pos':
+        kp = 2*np.pi*BW/(2*zeta+1)
+    elif mode == 'vel':
+        kp = 0
+    ki = J*(2*zeta+1)*(2*np.pi*BW)**2
+    kv = J*(2*zeta+1)*(2*np.pi*BW) - b
+elif control == 'pid':
+    ko = 1e-2
+    fo = 0.6
+    # kp = 0.01
+    # ki = 0
+    # kd = 0
+    kp = 0.6*ko
+    ki = 2*fo*kp
+    kd = kp/(8*fo)
 
 def pid_d(idx, dt, ref, mea):
     global r_arr, e_arr, u_arr, prev_u, prev_error, prev2_error
@@ -31,9 +45,19 @@ def pid_d(idx, dt, ref, mea):
          + kd/dt*prev2_error)
     prev2_error = prev_error
     prev_error = error
-    # prev_time = ti
     prev_u = u
-    
+    # save values
+    r_arr[idx] = ref
+    e_arr[idx] = error
+    u_arr[idx] = u
+    return u
+
+def pid(idx, dt, ref, mea):
+    global r_arr, e_arr, u_arr, integral, prev_error
+    error = ref - mea
+    integral = integral + error*dt
+    u = kp*error + ki*integral + kd*(error-prev_error)/dt
+    prev_error = error
     # save values
     r_arr[idx] = ref
     e_arr[idx] = error
@@ -41,9 +65,8 @@ def pid_d(idx, dt, ref, mea):
     return u
 
 def model_d(idx, dt, u):
-    global x_arr, y_arr, k, b, m
+    global x_arr, y_arr
     # model discrete mass spring damper
-    # u = ref[i]  # check open loop
     u = np.array([[u]])
     A = np.array([[        1,           dt],
                   [-(dt*k)/m, 1 - (dt*b)/m]])
@@ -58,7 +81,7 @@ def model_d(idx, dt, u):
     return y_arr[0, idx:idx+1], y_arr[1, idx:idx+1]
 
 def piv(idx, dt, ref_theta, ref_omega, mea_theta, mea_omega):
-    global integral, kp, ki, kv, r_arr, e_arr, u_arr
+    global r_arr, e_arr, u_arr, integral
     error = ref_theta - mea_theta
     u1 = kp*error + ref_omega - mea_omega
     integral = integral + u1*dt
@@ -68,6 +91,21 @@ def piv(idx, dt, ref_theta, ref_omega, mea_theta, mea_omega):
     e_arr[idx] = error
     u_arr[idx] = u2
     return u2
+
+def servo_d(idx, dt, u):
+    global x_arr, y_arr
+    u = np.array([[u]])
+    A = np.array([[1,           dt],
+                  [0, 1 - (dt*b)/J]])
+    B = np.array([[      0],
+                  [dt*Kt/J]])
+    C = np.array([[1, 0],
+                  [0, 1]])
+    D = np.array([[0],
+                  [0]])
+    x_arr[:, idx+1:idx+2] = A@x_arr[:, idx:idx+1] + B@u
+    y_arr[:, idx:idx+1] = C@x_arr[:, idx:idx+1] + D@u
+    return y_arr[0, idx:idx+1], y_arr[1, idx:idx+1]
 
 # initialize constants/arrays
 global prev_time, prev_error, prev2_error, prev_u, integral
@@ -83,23 +121,30 @@ u_arr = np.zeros(len(time))
 x_arr = np.zeros((2, len(time)))
 y_arr = np.zeros((2, len(time)))
 
-yx = 0
-yv = 0
-for i in range(0, len(time)):
-    dt = time[i] - prev_time
-    prev_time = time[i]
-    # u = pid_d(i, dt, ref[i], yx)
-    u = piv(i, dt, ref[i], ref_omega, yx, yv)
-    yx, yv = model_d(i, dt, u)
+if __name__ == '__main__':
+    yx = 0
+    yv = 0
+    for idx in range(0, len(time)):
+        dt = time[idx] - prev_time
+        prev_time = time[idx]
 
-# plotting
-plt.figure(1)
-plt.plot(time, r_arr, 'b', label='r')
-plt.plot(time, e_arr, 'r', label='e')
-# plt.plot(time, u_arr, 'g', label='u')
-plt.plot(time, x_arr[0, :], label='x1')
-plt.plot(time, x_arr[1, :], label='x2')
-plt.plot(time, y_arr[0, :], '--', label='y1')
-plt.plot(time, y_arr[1, :], '--', label='y2')
-plt.legend()
-plt.show()
+        if control == 'piv':
+            u = piv(idx, dt, ref_theta[idx], ref_omega, yx, yv)
+        elif control == 'pid':
+            u = pid(idx, dt, ref_theta[idx], yx)
+        else:
+            u = ref_theta[idx]  # open loop
+        # yx, yv = model_d(i, dt, u)
+        yx, yv = servo_d(idx, dt, u)
+
+    # plotting
+    plt.figure(1)
+    plt.plot(time, r_arr, 'b', label='r')
+    plt.plot(time, e_arr, 'r', label='e')
+    # plt.plot(time, u_arr, 'g', label='u')
+    plt.plot(time, x_arr[0, :], label='x1')
+    plt.plot(time, x_arr[1, :], label='x2')
+    plt.plot(time, y_arr[0, :], '--', label='y1')
+    plt.plot(time, y_arr[1, :], '--', label='y2')
+    plt.legend()
+    plt.show()
