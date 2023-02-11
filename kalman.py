@@ -20,7 +20,6 @@ sys = control.ss(A, B, C, D)
 # reference
 dt = 0.01
 time = np.arange(0, 10, dt)
-print(f'time: {np.shape(time)}')
 ref = F*np.ones(np.shape(time))
 
 # tuning matrix
@@ -50,13 +49,19 @@ Pdot = np.zeros((len(time),2,2))
 x[:,[0]] = x0
 P[[0],:,:] = P0
 for i in range(0, len(time)-1):
-    xdot[:,[i]] = A@x[:,[i]] + B@ref[i].reshape(1,1)
-    P[[i],:,:] = A@P[[i],:,:]@A.T + Q
+    # predict
+    # xdot[:,[i]] = A@x[:,[i]] + B@ref[i].reshape(1,1)
+    # P[[i],:,:] = A@P[[i],:,:]@A.T + Q
+    F = np.eye(len(A)) + A*dt
+    x[:,[i+1]] = F@x[:,[i]] + B*ref[i]*dt
+    P[[i+1],:,:] = F@P[[i],:,:]@F.T + Q*dt
+    # update
     K = P[[i],:,:]@C.T@np.linalg.pinv(C@P[[i],:,:]@C.T + R)
     x[:,[i]] = x[:,[i]] + K@(youtn[i].reshape(1,1) - C@x[:,[i]])
     P[[i],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
     # integrate
-    x[:,[i+1]] = x[:,[i]] + xdot[:,[i]]*dt
+    # x[:,[i+1]] = x[:,[i]] + xdot[:,[i]]*dt
+
 
 # plotting
 plt.figure(1)
