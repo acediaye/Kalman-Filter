@@ -27,7 +27,7 @@ ref = F*np.ones(np.shape(time))
 P0 = np.array([[1, 0],
               [0, 1]])  # covariance matrix
 # 0 == good, 1 == bad
-w = 0  # std dev process noise
+w = 0.2  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
 v = 1 - w  # std dev measurement noise
@@ -88,13 +88,12 @@ if __name__ == '__main__':
         for i in range(0, len(time)-1):
             # print(np.shape(xdot[:,i:i+1]), np.shape(x[:,i:i+1]), np.shape(ref[[i]]))
             xdot[:,[i]] = A@x[:,[i]] + B@ref[i].reshape(1,1)
-            Pdot[[i],:,:] = A@P[[i],:,:]@A.T + Q
+            P[[i],:,:] = A@P[[i],:,:]@A.T + Q
             K = P[[i],:,:]@C.T@np.linalg.pinv(C@P[[i],:,:]@C.T + R)
             x[:,[i]] = x[:,[i]] + K@(youtn[i].reshape(1,1) - C@x[:,[i]])
             P[[i],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
             # integrate
             x[:,[i+1]] = x[:,[i]] + xdot[:,[i]]*dt
-            P[[i+1],:,:] = P[[i],:,:] + Pdot[[i],:,:]*dt
         # print(np.shape(x), np.shape(xdot), np.shape(P), np.shape(Pdot))
         
         # plotting

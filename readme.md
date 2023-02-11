@@ -91,7 +91,7 @@ R is the sensor noise variance\
 High values for w means that the process noise is high and the kalman gain should favor the sensor measurement. While low values for w means that the process noise is low and the kalman gain should favor the calculated output. The same goes for v, the measurement noise. 
 
 # Plots
-With w = 0.5 and v = 0.5
+With w = 0.2 and v = 0.8
 
 ![image](plots/response_wv.png)
 
@@ -109,11 +109,11 @@ With w = 0 and v = 1
 
 Can see with high sensor noise, the kalman gain favors the calculated output and the estimated states follows the y signal without noise.
 
-with disturbance and noise turned off.
+with noise turned off.
 
 ![image](plots/response_predict.png)
 
-The estimated states can follow the output y signal a lot better. (should be perfect need fixing?)
+The estimated states can follow the output y signal.
 
 # References
 [Kalman filter wiki](https://en.wikipedia.org/wiki/Kalman_filter)
