@@ -26,7 +26,8 @@ ref = F*np.ones(np.shape(time))
 # tuning matrix
 P0 = np.array([[1, 0],
               [0, 1]])  # covariance matrix
-w = 0.2  # std dev process noise
+# 0 == good, 1 == bad
+w = 0  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
 v = 1 - w  # std dev measurement noise
@@ -82,6 +83,7 @@ if __name__ == '__main__':
         x[:,[0]] = x0
         xdot = np.zeros((2, len(time)))
         P = np.zeros((len(time),2,2))  # many 2x2 array
+        P[[0],:,:] = P0
         Pdot = np.zeros((len(time),2,2))
         for i in range(0, len(time)-1):
             # print(np.shape(xdot[:,i:i+1]), np.shape(x[:,i:i+1]), np.shape(ref[[i]]))
