@@ -54,11 +54,11 @@ for i in range(0, len(time)-1):
     # P[[i],:,:] = A@P[[i],:,:]@A.T + Q
     F = np.eye(len(A)) + A*dt
     x[:,[i+1]] = F@x[:,[i]] + B*ref[i]*dt
-    P[[i+1],:,:] = F@P[[i],:,:]@F.T + Q*dt
+    P[[i],:,:] = F@P[[i],:,:]@F.T + Q
     # update
     K = P[[i],:,:]@C.T@np.linalg.pinv(C@P[[i],:,:]@C.T + R)
     x[:,[i]] = x[:,[i]] + K@(youtn[i].reshape(1,1) - C@x[:,[i]])
-    P[[i],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
+    P[[i+1],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
     # integrate
     # x[:,[i+1]] = x[:,[i]] + xdot[:,[i]]*dt
 
