@@ -24,7 +24,7 @@ $$\hat{x}[k+1] = F\hat{x}[k] + dtBu[k]$$
 
 2. predicted next covariance estimate
 
-$$\hat{P}[k+1] = F\hat{P}[k]F.T + dtQ$$
+$$\hat{P}[k+1] = F\hat{P}[k]F.T + Q$$
 
 # Update step
 
