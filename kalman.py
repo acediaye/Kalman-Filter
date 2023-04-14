@@ -48,20 +48,17 @@ Pdot = np.zeros((len(time),2,2))
 # init
 x[:,[0]] = x0
 P[[0],:,:] = P0
-for i in range(0, len(time)-1):
+for i in range(1, len(time)):
     # predict
-    # xdot[:,[i]] = A@x[:,[i]] + B@ref[i].reshape(1,1)
-    # P[[i],:,:] = A@P[[i],:,:]@A.T + Q
     F = np.eye(len(A)) + A*dt
-    x[:,[i+1]] = F@x[:,[i]] + B*ref[i]*dt
-    P[[i],:,:] = F@P[[i],:,:]@F.T + Q
+    x[:,[i]] = F@x[:,[i-1]] + B*ref[i]*dt
+    P[[i],:,:] = F@P[[i-1],:,:]@F.T + Q
     # update
     K = P[[i],:,:]@C.T@np.linalg.pinv(C@P[[i],:,:]@C.T + R)
     x[:,[i]] = x[:,[i]] + K@(youtn[i].reshape(1,1) - C@x[:,[i]])
-    P[[i+1],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
+    P[[i],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
     # integrate
     # x[:,[i+1]] = x[:,[i]] + xdot[:,[i]]*dt
-
 
 # plotting
 plt.figure(1)

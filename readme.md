@@ -3,6 +3,8 @@ Kalman filter is a two step process that first predicts the next state of the sy
 
 ![image](pics/kalman_diagram.PNG)
 
+![image](pics/kalman_eq.PNG)
+
 # Predict step
 0. Initial estimates for $\hat{x_0}$ and $\hat{P_0}$
 
