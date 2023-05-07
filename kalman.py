@@ -41,24 +41,23 @@ youtn = yout + noise  # 1x100
 
 # saving array
 x = np.zeros((2, len(time)))  # 2xn
-xdot = np.zeros((2, len(time)))
-P = np.zeros((len(time),2,2))  # n 2x2 array
-Pdot = np.zeros((len(time),2,2))
+P = np.zeros((2,2,len(time)))  # n 2x2 array
 
 # init
 x[:,[0]] = x0
-P[[0],:,:] = P0
+P[:,:,0] = P0
 for i in range(1, len(time)):
     # predict
     F = np.eye(len(A)) + A*dt
     x[:,[i]] = F@x[:,[i-1]] + B*ref[i]*dt
-    P[[i],:,:] = F@P[[i-1],:,:]@F.T + Q
+    P[:,:,i] = F@P[:,:,i-1]@F.T + Q
     # update
-    K = P[[i],:,:]@C.T@np.linalg.pinv(C@P[[i],:,:]@C.T + R)
+    K = P[:,:,i]@C.T@np.linalg.pinv(C@P[:,:,i]@C.T + R)
     x[:,[i]] = x[:,[i]] + K@(youtn[i].reshape(1,1) - C@x[:,[i]])
-    P[[i],:,:] = P[[i],:,:] - K@C@P[[i],:,:]
+    P[:,:,i] = P[:,:,i] - K@C@P[:,:,i]
     # integrate
     # x[:,[i+1]] = x[:,[i]] + xdot[:,[i]]*dt
+# print(np.shape(P[0,0,:]), np.shape(R), np.shape(P[:,:,0]), np.shape(C))
 
 # plotting
 plt.figure(1)
@@ -68,6 +67,15 @@ plt.plot(time, x[0,:], label='x1')
 plt.plot(time, x[1,:], label='x2')
 plt.title('kalman filter')
 plt.xlabel('time')
-plt.ylabel('magnitude')
+plt.ylabel('amplitude')
+plt.legend()
+plt.figure(2)
+plt.plot(tout, P[0,0,:], label='P11')
+plt.plot(tout, P[0,1,:], label='P12')
+plt.plot(tout, P[1,0,:], '--', label='P21')
+plt.plot(tout, P[1,1,:], label='P22')
+plt.title('P')
+plt.xlabel('time')
+plt.ylabel('amplitude')
 plt.legend()
 plt.show()
