@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import control
 
 # tuning constants
-m = 10
-b = 10
-k = 20
-F = 10
+m = 10  # kg
+b = 10  # Ns/m
+k = 20  # N/m
+F = 10  # N
 
 # state space
 A = np.array([[   0,    1],
@@ -23,20 +23,19 @@ time = np.arange(0, 10, dt)
 ref = F*np.ones(np.shape(time))
 
 # tuning matrix
-P0 = np.array([[1, 0],
-               [0, 1]])  # covariance matrix
-# 0 == good, 1 == bad
-w = 0.2  # std dev process noise
+w = 0.02  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
-v = 1 - w  # std dev measurement noise
+v = 0.02  # std dev measurement noise
 R = np.array([[v**2]])  # covariance measurement noise
 x0 = np.array([[0],
                [0]])  # initial state
+P0 = np.array([[1, 0],
+               [0, 1]])  # covariance matrix
 
 # simulate response data with noise
-tout, yout = control.forced_response(sys, time, ref, x0)
-noise = np.random.normal(0, 0.1, np.shape(time))  # assume guassian noise: mu, sigma
+tout, yout, xout = control.forced_response(sys, time, ref, x0, return_x=True)
+noise = np.random.normal(0, v, np.shape(time))  # assume guassian noise: mu, sigma
 youtn = yout + noise  # 1x100
 
 # saving array
@@ -46,13 +45,16 @@ P = np.zeros((2,2,len(time)))  # n 2x2 array
 # init
 x[:,[0]] = x0
 P[:,:,0] = P0
+
+# loop
 for i in range(1, len(time)):
     # predict
     F = np.eye(len(A)) + A*dt
     x[:,[i]] = F@x[:,[i-1]] + B*ref[i]*dt
     P[:,:,i] = F@P[:,:,i-1]@F.T + Q
-    # update
+    # kalman
     K = P[:,:,i]@C.T@np.linalg.pinv(C@P[:,:,i]@C.T + R)
+    # update
     x[:,[i]] = x[:,[i]] + K@(youtn[i].reshape(1,1) - C@x[:,[i]])
     P[:,:,i] = P[:,:,i] - K@C@P[:,:,i]
     # integrate
@@ -61,20 +63,13 @@ for i in range(1, len(time)):
 
 # plotting
 plt.figure(1)
-plt.plot(tout, yout, label='y')
-plt.plot(tout, youtn, label='y+noise')
-plt.plot(time, x[0,:], label='x1')
-plt.plot(time, x[1,:], label='x2')
+# plt.plot(tout, yout, label='y')
+# plt.plot(tout, youtn, label='y+noise')
+plt.plot(time, x[0,:], '-', label='xhat1')
+plt.plot(time, x[1,:], '-', label='xhat2')
+plt.plot(tout, xout[0,:], '-', label='x1')
+plt.plot(tout, xout[1,:], '-', label='x2')
 plt.title('kalman filter')
-plt.xlabel('time')
-plt.ylabel('amplitude')
-plt.legend()
-plt.figure(2)
-plt.plot(tout, P[0,0,:], label='P11')
-plt.plot(tout, P[0,1,:], label='P12')
-plt.plot(tout, P[1,0,:], '--', label='P21')
-plt.plot(tout, P[1,1,:], label='P22')
-plt.title('P')
 plt.xlabel('time')
 plt.ylabel('amplitude')
 plt.legend()
