@@ -1,50 +1,52 @@
 # Kalman Filter
-Kalman filter is a two step process that first predicts the next state of the system by calculating with the system's model and known control inputs. Then updating the output by combining it with sensor measurements. Kalman filter's final output is somewhere in between the calculated output and sensor measurement; this ratio is known as kalman gain.
+Kalman filter is a two step process that first predicts the next state of the system by calculating with the system's model equations and known control inputs. Then updating the output by combining it with sensor measurements. Kalman filter's final output is somewhere in between the calculated output and sensor measurement; this ratio is known as kalman gain.
 
 ![image](pics/kalman_diagram.PNG)
 
 ![image](pics/kalman_eq.PNG)
 
 # Predict step
-0. Initial estimates for $\hat{x_0}$ and $\hat{P_0}$
+Initial estimates for $\hat{x_0}$ and $\hat{P_0}$
 
 $$F = e^{A*dt} \~= I+Adt$$
 
-1. predicted next state estimate
+1. Predicted next state estimate
 
-$$\dot{\hat{x}} = A\hat{x}+Bu$$
+$$ \dot{\hat{x}} = A\hat{x}+Bu $$
 
-$$\frac{\hat{x}[k+1]-\hat{x}[k]}{dt} = A\hat{x}[k] + Bu[k]$$
+$$ \frac{\hat{x}[k+1]-\hat{x}[k]}{dt} = A\hat{x}[k] + Bu[k] $$
 
-$$\hat{x}[k+1] = \hat{x}[k] + dt(A\hat{x}[k] + Bu[k])$$
+$$ \hat{x}[k+1] = \hat{x}[k] + dt(A\hat{x}[k] + Bu[k]) $$
 
-$$\hat{x}[k+1] = (I+Adt)\hat{x}[k] + dtBu[k]$$
+$$ \hat{x}[k+1] = (I+Adt)\hat{x}[k] + dtBu[k] $$
 
-$$F = I + A*dt$$
+$$ F = I + A*dt $$
 
-$$\hat{x}[k+1] = F\hat{x}[k] + dtBu[k]$$
+$$ \hat{x}[k+1] = F\hat{x}[k] + dtBu[k] $$
 
-2. predicted next covariance estimate
+$$ \hat{x}[k] = F\hat{x}[k-1] + dtBu[k-1] $$
 
-$$\hat{P}[k+1] = F\hat{P}[k]F.T + Q$$
+2. Predicted next covariance estimate
+
+$$ \hat{P}[k] = F\hat{P}[k-1]F^T + Q $$
 
 # Update step
 
-1. calculate current Kalman gain
+3. Calculate current Kalman gain
 
-$$K = \hat{P}[k]C.T/(C\hat{P}[k]C.T + R)$$
+$$ K = \frac{\hat{P}[k]C^T} {C\hat{P}[k]C^T + R} $$
 
-Kalman gain is a raio of 
+Kalman gain is a ratio of 
 
 uncertainty in estimate covariance / (uncertainty in estimate covariance + uncertainty in measurement)
 
-2. update current state estimate
+4. Update current state estimate
 
-$$\hat{x}[k] = \hat{x}[k] + K(y - C\hat{x}[k])$$
+$$\hat{x}[k] = \hat{x}[k] + K(y[k] - C\hat{x}[k])$$
 
 Can see taking the difference between measurement y and the calculated state output $C\hat{x}$. Then taking a portion of the difference (Kalman gain) and adding it to the predicted state to find the final state
 
-3. update current covariance estimate
+5. update current covariance estimate
 
 $$P[k] = (I - KC)\hat{P}[k]$$
 
