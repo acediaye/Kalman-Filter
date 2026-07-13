@@ -23,10 +23,10 @@ time = np.arange(0, 10, dt)
 ref = F*np.ones(np.shape(time))
 
 # tuning matrix
-w = 0.02  # std dev process noise
+w = 0.01  # std dev process noise
 Q = np.array([[w**2, 0],
               [0, w**2]])  # covariance process noise
-v = 0.02  # std dev measurement noise
+v = 0.1  # std dev measurement noise
 R = np.array([[v**2]])  # covariance measurement noise
 x0 = np.array([[0],
                [0]])  # initial state
@@ -64,11 +64,11 @@ for i in range(1, len(time)):
 # plotting
 plt.figure(1)
 # plt.plot(tout, yout, label='y')
-# plt.plot(tout, youtn, label='y+noise')
+plt.plot(tout, youtn, label='y+noise')
 plt.plot(time, x[0,:], '-', label='xhat1')
 plt.plot(time, x[1,:], '-', label='xhat2')
-plt.plot(tout, xout[0,:], '-', label='x1')
-plt.plot(tout, xout[1,:], '-', label='x2')
+# plt.plot(tout, xout[0,:], '-', label='x1')
+# plt.plot(tout, xout[1,:], '-', label='x2')
 plt.title('kalman filter')
 plt.xlabel('time')
 plt.ylabel('amplitude')
